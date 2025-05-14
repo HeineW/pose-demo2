@@ -1,20 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Object Detection with coco-ssd</title>
-  <link rel="stylesheet" href="style.css"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pose Detection with TensorFlow.js</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <h1>Object Detection</h1>
-  <div id="container">
-    <video id="video" playsinline autoplay></video>
-    <canvas id="canvas"></canvas>
-    <div id="fps">FPS: --</div>
-  </div>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.21.0"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
-  <script src="script.js"></script>
+    <div class="container">
+        <h1>Real-time Pose Detection</h1>
+        <div class="video-container">
+            <video id="video" playsinline></video>
+            <canvas id="output"></canvas>
+        </div>
+        <div class="controls">
+            <button id="startButton">Start Detection</button>
+            <div class="model-selector">
+                <label for="modelType">Model:</label>
+                <select id="modelType">
+                    <option value="lite">MoveNet Lightning (Fast)</option>
+                    <option value="heavy">MoveNet Thunder (Accurate)</option>
+                </select>
+            </div>
+            <div id="fps"></div>
+        </div>
+    </div>
+
+    <!-- Load TensorFlow.js and MoveNet -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.18.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection@0.0.7/dist/pose-detection.min.js"></script>
+    
+    <script src="app.js"></script>
 </body>
 </html>
