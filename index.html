@@ -3,19 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Pose Estimation App</title>
+  <title>Object Detection with coco-ssd</title>
   <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
-  <h1>Pose Estimation</h1>
+  <h1>Object Detection</h1>
   <div id="container">
     <video id="video" playsinline autoplay></video>
     <canvas id="canvas"></canvas>
     <div id="fps">FPS: --</div>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.21.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
   <script src="script.js"></script>
 </body>
 </html>

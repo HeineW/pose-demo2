@@ -3,7 +3,7 @@ const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const fpsDisplay = document.getElementById('fps');
 
-let detector;
+let model;
 let lastTime = performance.now();
 let frames = 0;
 
@@ -18,42 +18,6 @@ async function setupCamera() {
   });
 }
 
-async function loadModel() {
-  await tf.setBackend('webgl');
-  await tf.ready();
-  const detectorConfig = {
-    modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING,
-  };
-  detector = await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet, detectorConfig);
-}
-
-function drawSkeleton(keypoints) {
-  const adjacentPairs = poseDetection.util.getAdjacentPairs(poseDetection.SupportedModels.MoveNet);
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.lineWidth = 2;
-  ctx.strokeStyle = "red";
-  ctx.fillStyle = "blue";
-
-  for (const keypoint of keypoints) {
-    if (keypoint.score > 0.4) {
-      ctx.beginPath();
-      ctx.arc(keypoint.x, keypoint.y, 5, 0, 2 * Math.PI);
-      ctx.fill();
-    }
-  }
-
-  for (const [i, j] of adjacentPairs) {
-    const kp1 = keypoints[i];
-    const kp2 = keypoints[j];
-    if (kp1.score > 0.4 && kp2.score > 0.4) {
-      ctx.beginPath();
-      ctx.moveTo(kp1.x, kp1.y);
-      ctx.lineTo(kp2.x, kp2.y);
-      ctx.stroke();
-    }
-  }
-}
-
 function updateFPS() {
   const now = performance.now();
   frames++;
@@ -64,22 +28,41 @@ function updateFPS() {
   }
 }
 
-async function detectPose() {
-  if (detector && video.readyState === 4) {
-    const poses = await detector.estimatePoses(video);
-    if (poses.length > 0 && poses[0].keypoints) {
-      drawSkeleton(poses[0].keypoints);
-    }
+function buildObjectRectangle(prediction) {
+  const [x, y, width, height] = prediction.bbox;
+  ctx.strokeStyle = '#00FFFF';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(x, y, width, height);
+
+  ctx.fillStyle = '#00FFFF';
+  ctx.font = '16px sans-serif';
+  ctx.fillText(
+    `${prediction.class} (${(prediction.score * 100).toFixed(1)}%)`,
+    x,
+    y > 10 ? y - 5 : y + 15
+  );
+}
+
+async function detectObjects() {
+  if (model && video.readyState === 4) {
+    const predictions = await model.detect(video);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    predictions.forEach(prediction => {
+      if (prediction.score > 0.5) {
+        buildObjectRectangle(prediction);
+      }
+    });
   }
   updateFPS();
-  requestAnimationFrame(detectPose);
+  requestAnimationFrame(detectObjects);
 }
 
 async function main() {
   await setupCamera();
   video.play();
-  await loadModel();
-  detectPose();
+  model = await cocoSsd.load();
+  detectObjects();
 }
 
 main();
