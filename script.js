@@ -4,9 +4,8 @@ const ctx = canvas.getContext('2d');
 const fpsDisplay = document.getElementById('fps');
 
 let detector;
-let lastFrameTime = performance.now();
-let frameCount = 0;
-let fps = 0;
+let lastTime = performance.now();
+let frames = 0;
 
 async function setupCamera() {
   const stream = await navigator.mediaDevices.getUserMedia({
@@ -20,6 +19,8 @@ async function setupCamera() {
 }
 
 async function loadModel() {
+  await tf.setBackend('webgl');
+  await tf.ready();
   const detectorConfig = {
     modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING,
   };
@@ -55,20 +56,20 @@ function drawSkeleton(keypoints) {
 
 function updateFPS() {
   const now = performance.now();
-  frameCount++;
-  const delta = now - lastFrameTime;
-  if (delta >= 1000) {
-    fps = Math.round((frameCount / delta) * 1000);
-    fpsDisplay.textContent = `FPS: ${fps}`;
-    lastFrameTime = now;
-    frameCount = 0;
+  frames++;
+  if (now - lastTime >= 1000) {
+    fpsDisplay.textContent = `FPS: ${frames}`;
+    frames = 0;
+    lastTime = now;
   }
 }
 
 async function detectPose() {
-  const poses = await detector.estimatePoses(video);
-  if (poses.length > 0) {
-    drawSkeleton(poses[0].keypoints);
+  if (detector && video.readyState === 4) {
+    const poses = await detector.estimatePoses(video);
+    if (poses.length > 0 && poses[0].keypoints) {
+      drawSkeleton(poses[0].keypoints);
+    }
   }
   updateFPS();
   requestAnimationFrame(detectPose);
